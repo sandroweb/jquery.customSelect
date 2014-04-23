@@ -29,7 +29,14 @@
                 customSelectSpanInner = customSelectSpan.children(':first'),
                 html = currentSelected.html() || '&nbsp;';
 
-                customSelectSpanInner.html(html);
+                if(customSelectSpan.hasClass(getClass('NoWrap')) == true)
+                {
+                    noWrapTextApply(customSelectSpan, html) 
+                }
+                else
+                {
+                    customSelectSpanInner.html(html);
+                }
                 
                 if (currentSelected.attr('disabled')) {
                     customSelectSpan.addClass(getClass('DisabledOption'));
@@ -39,9 +46,74 @@
                 
                 setTimeout(function () {
                     customSelectSpan.removeClass(getClass('Open'));
-                    $(document).off('mouseup.customSelect');                  
+                    $(document).off('mouseup.customSelect');   
+                    $select.css({
+                        width:                customSelectSpan.outerWidth()
+                    });               
                 }, 60);
             },
+
+            noWrapTextApply = function(customSelectSpan, txt){
+                var arrWords = txt.split(' '),
+                    arrLetters = txt.split(''),
+                    label = customSelectSpan.find('.' + getClass('Inner')),
+                    testLabel = customSelectSpan.find('.' + getClass('TestInner')),
+                    maxWidth = customSelectSpan.width(),
+                    finishText = '...',
+                    tempText = txt;
+
+                testLabel.html(txt);
+                if(testLabel.width() > maxWidth)
+                {
+                    if(arrWords.length > 1)
+                    {
+                        for(var i = arrWords.length - 1; i >= 0; --i)
+                        {
+                            tempText = '';
+                            for(var j = 0, total = i; j < total; ++j)
+                            {
+                                tempText = tempText + ((j == 0) ? arrWords[j] : ' ' + arrWords[j]);
+                            }
+                            testLabel.html(tempText + finishText);
+                            if(testLabel.width() > maxWidth)
+                            {
+                                tempText = finishText;
+                                testLabel.html('');
+                            }
+                            else
+                            {
+                                tempText = tempText + finishText;
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        for(var i = arrLetters.length - 1; i >= 0; --i)
+                        {
+                            tempText = '';
+                            for(var j = 0, total = i; j < total; ++j)
+                            {
+                                tempText = tempText + arrLetters[j];
+                            }
+                            testLabel.html(tempText + finishText);
+                            if(testLabel.width() > maxWidth)
+                            {
+                                tempText = finishText;
+                                testLabel.html('');
+                            }
+                            else
+                            {
+                                tempText = tempText + finishText;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                label.html(tempText);
+            },
+
             getClass = function(suffix){
                 return prefix + suffix;
             };
@@ -49,9 +121,11 @@
             return this.each(function () {
                 var $select = $(this),
                     customSelectInnerSpan = $('<span />').addClass(getClass('Inner')),
+                    customSelectInnerTestSpan = $('<span />').addClass(getClass('TestInner')).html('...'),
                     customSelectSpan = $('<span />');
 
                 $select.after(customSelectSpan.append(customSelectInnerSpan));
+                $select.after(customSelectSpan.append(customSelectInnerTestSpan));
                 
                 customSelectSpan.addClass(prefix);
 
@@ -61,12 +135,15 @@
                 if (options.mapStyle) {
                     customSelectSpan.attr('style', $select.attr('style'));
                 }
+                if(options.noWrap) {
+                    customSelectSpan.addClass(getClass('NoWrap'));
+                }
 
                 $select
                     .addClass('hasCustomSelect')
                     .on('render.customSelect', function () {
                         changed($select,customSelectSpan);
-                        $select.css('width','');			
+                        $select.css('width','');            
                         var selectBoxWidth = parseInt($select.outerWidth(), 10) -
                                 (parseInt(customSelectSpan.outerWidth(), 10) -
                                     parseInt(customSelectSpan.width(), 10));
