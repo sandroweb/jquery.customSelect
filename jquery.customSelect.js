@@ -75,12 +75,7 @@
                                 tempText = tempText + ((j == 0) ? arrWords[j] : ' ' + arrWords[j]);
                             }
                             testLabel.html(tempText + finishText);
-                            if(testLabel.width() > maxWidth)
-                            {
-                                tempText = finishText;
-                                testLabel.html('');
-                            }
-                            else
+                            if(testLabel.width() < maxWidth)
                             {
                                 tempText = tempText + finishText;
                                 break;
@@ -99,19 +94,17 @@
                             testLabel.html(tempText + finishText);
                             if(testLabel.width() > maxWidth)
                             {
-                                tempText = finishText;
-                                testLabel.html('');
-                            }
-                            else
-                            {
                                 tempText = tempText + finishText;
                                 break;
                             }
                         }
                     }
+                    label.html(tempText);
                 }
-
-                label.html(tempText);
+                else
+                {
+                    label.html(txt);
+                }
             },
 
             getClass = function(suffix){
@@ -120,8 +113,8 @@
 
             return this.each(function () {
                 var $select = $(this),
-                    customSelectInnerSpan = $('<span />').addClass(getClass('Inner')),
-                    customSelectInnerTestSpan = $('<span />').addClass(getClass('TestInner')).html('...'),
+                    customSelectInnerSpan = $('<span>2</span>').addClass(getClass('Inner')),
+                    customSelectInnerTestSpan = $('<span>2</span>').addClass(getClass('TestInner')).html('...'),
                     customSelectSpan = $('<span />');
 
                 $select.after(customSelectSpan.append(customSelectInnerSpan));
@@ -142,7 +135,6 @@
                 $select
                     .addClass('hasCustomSelect')
                     .on('render.customSelect', function () {
-                        changed($select,customSelectSpan);
                         $select.css('width','');            
                         var selectBoxWidth = parseInt($select.outerWidth(), 10) -
                                 (parseInt(customSelectSpan.outerWidth(), 10) -
@@ -168,12 +160,14 @@
 
                         $select.css({
                             '-webkit-appearance': 'menulist-button',
-                            width:                customSelectSpan.outerWidth(),
+                            width:                customSelectSpan.width(),
                             position:             'absolute',
                             opacity:              0,
                             height:               selectBoxHeight,
                             fontSize:             customSelectSpan.css('font-size')
                         });
+
+                        changed($select,customSelectSpan);
                     })
                     .on('change.customSelect', function () {
                         customSelectSpan.addClass(getClass('Changed'));
